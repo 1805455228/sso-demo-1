@@ -12,7 +12,6 @@ import org.springframework.web.context.request.RequestContextListener;
  *
  */
 @SpringBootApplication
-@EnableOAuth2Sso
 public class App1 extends SpringBootServletInitializer {
 
 	@Bean

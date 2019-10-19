@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 
 @Configuration
 //配置授权中心
-@EnableAuthorizationServer
+@EnableAuthorizationServer //(授权服务)
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
@@ -30,7 +30,16 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				.checkTokenAccess("isAuthenticated()");
 	}
 
-// 完成！
+
+	/**
+	 *      *     authorization_code：传统的授权码模式<br>
+	 *      *     implicit：隐式授权模式<br>
+	 *      *     password：资源所有者（即用户）密码模式<br>
+	 *      *     client_credentials：客户端凭据（客户端ID以及Key）模式<br>
+	 *      *     refresh_token：获取access token时附带的用于刷新新的token模式
+	 * @param clients
+	 * @throws Exception
+	 */
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.inMemory()//
@@ -60,14 +69,29 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				
 				// refresh_token是spring Security特殊的授权，表示是否可以刷token
 				.authorizedGrantTypes("authorization_code")
+//				.authorizedGrantTypes("client_credentials", "refresh_token", "password", "authorization_code")
+				.accessTokenValiditySeconds(1200)
+				.refreshTokenValiditySeconds(50000)
+
+
 
 				// 用来限制客户端的访问范围，如果为空（默认）的话，那么客户端拥有全部的访问范围。
 				// 如果客户端配置了scope，就会收到影响
-				.scopes("user_info").autoApprove(true)//
+				//.scopes("all")
+				.scopes("user_info")
+				.authorities("client")
+				.autoApprove(true)//
+
 
 				// 判断回调是否合法 does not match one of the registered values
-				.redirectUris("http://localhost:8082/ui1/login", "http://localhost:8083/ui2/login");
+				.redirectUris("http://localhost:9001/ui/login", "http://localhost:9002/ui/login")
+				.and().build();
 
 		// 动态授权：ClientDetailsService clients.withClientDetails(clientDetailsService());
 	}
+
+//	注意：在配置文件中要注意 server.servlet.session.cookie.name 的配置，
+//	因为 cookie 不会保存端口，所以要注意客户端的 cookie 名和授权服务器的 cookie 名的不同。
+
+
 }
