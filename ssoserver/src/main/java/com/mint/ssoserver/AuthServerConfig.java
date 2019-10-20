@@ -2,6 +2,7 @@ package com.mint.ssoserver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -11,6 +12,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 @Configuration
 //配置授权中心
 @EnableAuthorizationServer //(授权服务)
+@Order(6) //安全过滤 要在oauth之前 （security配置顺序要在auth配置顺序之前）
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
@@ -28,6 +30,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				// url:/oauth/check_token allow check token
 				// 是否允许访问oath/check_token这个接口，这里配置是如果验证通过可以访问
 				.checkTokenAccess("isAuthenticated()");
+		oauthServer.allowFormAuthenticationForClients();
 	}
 
 
@@ -42,7 +45,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 	 */
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-		clients.inMemory()//
+		clients.inMemory()// 客户端存储信息存储于内存中
 				// （必须的）用来标识客户的Id。
 				// ssoclient每个都会配置一个clientid。用于判断是否允许访问授权中心
 				.withClient("SampleClientId")
@@ -68,8 +71,8 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 				// 可以参考 https://segmentfault.com/a/1190000012257809
 				
 				// refresh_token是spring Security特殊的授权，表示是否可以刷token
-				.authorizedGrantTypes("authorization_code")
-//				.authorizedGrantTypes("client_credentials", "refresh_token", "password", "authorization_code")
+//				.authorizedGrantTypes("authorization_code")
+				.authorizedGrantTypes("client_credentials", "refresh_token", "password", "authorization_code")
 				.accessTokenValiditySeconds(1200)
 				.refreshTokenValiditySeconds(50000)
 

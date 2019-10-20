@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableOAuth2Sso //授权码类型客户端
@@ -23,12 +24,12 @@ public class UiSecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configure(HttpSecurity http) throws Exception {
 		http.antMatcher("/**")
 				.authorizeRequests()//对授权请求进行配置
-				.antMatchers("/index","/login**","/logout").permitAll()
+				.antMatchers("/index","/login**", "/webjars/**","/logout").permitAll()
 				.anyRequest().authenticated()
 
 				// 官方版登出
-				.and().logout().logoutSuccessUrl("/").deleteCookies("JSESSIONID");
-
+				.and().logout().logoutSuccessUrl("/login").permitAll()
+				.and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
 		//自定义登出
 //				.and().logout().permitAll()

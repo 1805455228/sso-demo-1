@@ -11,10 +11,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.cors.CorsUtils;
 
 @Configuration
 @EnableWebSecurity
-@Order(1)
+@Order(2) //安全过滤 要在oauth之前 （security配置顺序要在auth配置顺序之前）
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
@@ -24,10 +25,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.requestMatchers()//
 				.antMatchers("/login", "/oauth/authorize","/logout")//
 				.and().authorizeRequests().anyRequest().authenticated()
-				.and().formLogin().permitAll();
-
+				.and().formLogin().permitAll()
+				.and().logout().logoutSuccessUrl("/login").permitAll();
 				//不使用官方的单点登出（自定义登出）
-//				.and().logout().permitAll()
+
 //				.logoutSuccessHandler(
 //						(request, response, authentication) -> {
 //							String callback = request.getParameter("callback");
@@ -43,6 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //						}
 //				);
 				http.cors().disable();
+				http.csrf().disable();
 	}
 
 	@Override
